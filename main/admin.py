@@ -1,3 +1,6 @@
 from django.contrib import admin
+from main.models import *
 
-# Register your models here.
+# Регистрация моделей для изменения через админку
+admin.site.register(Menu)
+admin.site.register(MenuBar)

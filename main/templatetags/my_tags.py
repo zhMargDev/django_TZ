@@ -1,21 +1,24 @@
 from django import template
-from main.models import Menu
+from main.models import MenuBar, Menu
 
-register = template.Library() #Для регистрации тегов
+register = template.Library()
 
-@register.inclusion_tag('main/menue_bar.html')
-def menues():
-    menus = [
-        {
-            'url': 'www',
-            'title': 'test'
-        }
-    ]
-    html_code = ""
+# Для отрисовки меню
+@register.inclusion_tag('menu/menu.html')
+def draw_menu(menu_name):
+    menu_bar = MenuBar.objects.get(name=menu_name)
+    menus = Menu.objects.filter(parent=None)
+    active_menu = get_active_menu(menus)
+    return {'menu_bar': menu_bar, 'menus': menus, 'active_menu': active_menu}
+
+# Для отрисовки активного элемента
+def get_active_menu(menus):
     for menu in menus:
-        html_code += f"""
-                <a href="{menu['url']}">{menu['title']}</a>
-            """
-    return {'tag': html_code}
-    #return Menu.objects.all()
-
+        if menu.url == request.path:
+            return menu
+        else:
+            children = Menu.objects.filter(parent=menu)
+            active_child = get_active_menu(children)
+            if active_child:
+                return active_child
+    return None
